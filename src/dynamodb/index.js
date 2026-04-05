@@ -20,6 +20,7 @@ import { DeviceInfo } from './Tables/DeviceInfo.js';
 import { UserReports } from './Tables/UserReports.js';
 import { CourseComments } from './Tables/CourseComments.js';
 import { CourseLikes } from './Tables/CourseLikes.js';
+import { CommunityPostComments } from './Tables/CommunityPostComments.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -43,6 +44,7 @@ export const createScopedTables = (scope) => {
         UserReports: createTable(scope, UserReports),
         CourseComments: createTable(scope, CourseComments),
         CourseLikes: createTable(scope, CourseLikes),
+        CommunityPostComments: createTable(scope, CommunityPostComments),
     }
     return tables;
 }

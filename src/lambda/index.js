@@ -19,6 +19,7 @@ const policies = {
         'dynamodb:UpdateItem',
         'dynamodb:Query',
         'dynamodb:DeleteItem',
+        'dynamodb:BatchGetItem'
     ],
     ses: ['ses:SendEmail'],
     lambda: ["lambda:InvokeFunction"],
