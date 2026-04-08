@@ -21,6 +21,9 @@ import { UserReports } from './Tables/UserReports.js';
 import { CourseComments } from './Tables/CourseComments.js';
 import { CourseLikes } from './Tables/CourseLikes.js';
 import { CommunityPostComments } from './Tables/CommunityPostComments.js';
+import { Cookbook } from './Tables/Cookbook.js';
+import { Achievements } from './Tables/Achievements.js';
+import { ModeratorAccounts } from './Tables/ModeratorAccounts.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -45,6 +48,9 @@ export const createScopedTables = (scope) => {
         CourseComments: createTable(scope, CourseComments),
         CourseLikes: createTable(scope, CourseLikes),
         CommunityPostComments: createTable(scope, CommunityPostComments),
+        Cookbook: createTable(scope, Cookbook),
+        Achievements: createTable(scope, Achievements),
+        ModeratorAccounts: createTable(scope, ModeratorAccounts),
     }
     return tables;
 }
