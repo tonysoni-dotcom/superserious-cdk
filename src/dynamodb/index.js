@@ -24,6 +24,7 @@ import { CommunityPostComments } from './Tables/CommunityPostComments.js';
 import { Cookbook } from './Tables/Cookbook.js';
 import { Achievements } from './Tables/Achievements.js';
 import { ModeratorAccounts } from './Tables/ModeratorAccounts.js';
+import { Blocks } from './Tables/Blocks.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -51,6 +52,7 @@ export const createScopedTables = (scope) => {
         Cookbook: createTable(scope, Cookbook),
         Achievements: createTable(scope, Achievements),
         ModeratorAccounts: createTable(scope, ModeratorAccounts),
+        Blocks: createTable(scope, Blocks),
     }
     return tables;
 }
