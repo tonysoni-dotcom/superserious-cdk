@@ -24,7 +24,7 @@ const policies = {
     ses: ['ses:SendEmail'],
     lambda: ["lambda:InvokeFunction"],
     api: ["execute-api:Invoke", "execute-api:ManageConnections"],
-    s3: ["s3:GetObject"],
+    s3: ["s3:GetObject", "s3:PutObject"],
     bedrock: [
         "bedrock:InvokeModel",
         "bedrock:Converse",
@@ -67,6 +67,10 @@ export const createBackendLambda = (scope) => {
         code: lambda.Code.fromAsset("../backend"),
         role: role,
         timeout: Duration.seconds(300),
+        environment: {
+            TOOLS_API_KEY: process.env.TOOLS_API_KEY || '',
+            PULSE_ADMIN_TOKEN: process.env.PULSE_ADMIN_TOKEN || '',
+        },
     });
 }
 
