@@ -25,6 +25,10 @@ import { Cookbook } from './Tables/Cookbook.js';
 import { Achievements } from './Tables/Achievements.js';
 import { ModeratorAccounts } from './Tables/ModeratorAccounts.js';
 import { Blocks } from './Tables/Blocks.js';
+import { SavedItems } from './Tables/SavedItems.js';
+import { EmailInbox } from './Tables/EmailInbox.js';
+import { EmailSenders } from './Tables/EmailSenders.js';
+import { InviteRequests } from './Tables/InviteRequests.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -53,6 +57,10 @@ export const createScopedTables = (scope) => {
         Achievements: createTable(scope, Achievements),
         ModeratorAccounts: createTable(scope, ModeratorAccounts),
         Blocks: createTable(scope, Blocks),
+        SavedItems: createTable(scope, SavedItems),
+        EmailInbox: createTable(scope, EmailInbox),
+        EmailSenders: createTable(scope, EmailSenders),
+        InviteRequests: createTable(scope, InviteRequests),
     }
     return tables;
 }
