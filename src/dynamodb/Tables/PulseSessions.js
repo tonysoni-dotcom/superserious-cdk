@@ -1,7 +1,7 @@
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
 export const PulseSessions = {
-    TableName: 'v1xPulseSessions',
+    TableName: 'v1xActivitySessions',
     partitionKey: { name: 'tenantId', type: dynamodb.AttributeType.STRING },
     sortKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
     indices: [

@@ -4,6 +4,8 @@ const origins = require('aws-cdk-lib/aws-cloudfront-origins');
 const acm = require('aws-cdk-lib/aws-certificatemanager');
 const { CfnOutput, Stack } = require('aws-cdk-lib');
 
+const API_GATEWAY_DOMAIN = '71lvzho52a.execute-api.us-east-1.amazonaws.com';
+
 const CERT_ARN = 'arn:aws:acm:us-east-1:260319374997:certificate/081272d9-7bd7-4362-8e6b-cab37654ace6';
 const DOMAIN_NAMES = ['superserious.com', 'www.superserious.com'];
 
@@ -30,6 +32,10 @@ const createWebsite = (scope) => {
         originAccessControlName: 'superserious-oac',
     });
 
+    const apiOrigin = new origins.HttpOrigin(API_GATEWAY_DOMAIN, {
+        originPath: '/dev',
+    });
+
     const distribution = new cloudfront.Distribution(scope, 'SuperseriousDistribution', {
         defaultRootObject: 'index.html',
         domainNames: DOMAIN_NAMES,
@@ -44,6 +50,15 @@ const createWebsite = (scope) => {
                 eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
             }],
             cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        },
+        additionalBehaviors: {
+            '/api/*': {
+                origin: apiOrigin,
+                viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+                originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+                allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+            },
         },
     });
 
