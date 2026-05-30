@@ -98,7 +98,7 @@ const createTable = (
         partitionKey: partitionKey,
         sortKey: sortKey,
         billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-        removalPolicy: RemovalPolicy.DESTROY,
+        removalPolicy: RemovalPolicy.RETAIN,
         tableName: `${TableName}`,
     })
 
