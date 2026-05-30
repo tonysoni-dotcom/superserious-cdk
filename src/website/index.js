@@ -1,14 +1,16 @@
-import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
-import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
-import { RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
+const s3 = require('aws-cdk-lib/aws-s3');
+const cloudfront = require('aws-cdk-lib/aws-cloudfront');
+const origins = require('aws-cdk-lib/aws-cloudfront-origins');
+const acm = require('aws-cdk-lib/aws-certificatemanager');
+const { CfnOutput, Stack } = require('aws-cdk-lib');
 
-export const createWebsite = (scope) => {
-    const bucket = new s3.Bucket(scope, 'SuperseriousWebsiteBucket', {
-        bucketName: 'superserious-website',
-        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        removalPolicy: RemovalPolicy.RETAIN,
-    });
+const CERT_ARN = 'arn:aws:acm:us-east-1:260319374997:certificate/081272d9-7bd7-4362-8e6b-cab37654ace6';
+const DOMAIN_NAMES = ['superserious.com', 'www.superserious.com'];
+
+const createWebsite = (scope) => {
+    const bucket = s3.Bucket.fromBucketName(scope, 'SuperseriousWebsiteBucket', 'superserious-website');
+
+    const certificate = acm.Certificate.fromCertificateArn(scope, 'SuperseriousCert', CERT_ARN);
 
     const directoryIndexFn = new cloudfront.Function(scope, 'SuperseriousDirectoryIndex', {
         functionName: 'superserious-directory-index',
@@ -30,6 +32,8 @@ export const createWebsite = (scope) => {
 
     const distribution = new cloudfront.Distribution(scope, 'SuperseriousDistribution', {
         defaultRootObject: 'index.html',
+        domainNames: DOMAIN_NAMES,
+        certificate,
         defaultBehavior: {
             origin: origins.S3BucketOrigin.withOriginAccessControl(bucket, {
                 originAccessControl: oac,
@@ -43,20 +47,37 @@ export const createWebsite = (scope) => {
         },
     });
 
-    new CfnOutput(scope, 'WebsiteBucketName', {
-        value: bucket.bucketName,
-        description: 'S3 bucket — target for aws s3 sync in deploy.sh',
+    // Explicitly create the bucket policy so CloudFront OAC can read S3
+    // (CDK can't auto-update the policy on an imported bucket)
+    new s3.CfnBucketPolicy(scope, 'WebsiteBucketPolicy', {
+        bucket: 'superserious-website',
+        policyDocument: {
+            Version: '2012-10-17',
+            Statement: [{
+                Effect: 'Allow',
+                Principal: { Service: 'cloudfront.amazonaws.com' },
+                Action: 's3:GetObject',
+                Resource: 'arn:aws:s3:::superserious-website/*',
+                Condition: {
+                    StringEquals: {
+                        'AWS:SourceArn': `arn:aws:cloudfront::${Stack.of(scope).account}:distribution/${distribution.distributionId}`,
+                    },
+                },
+            }],
+        },
+    });
+
+    new CfnOutput(scope, 'WebsiteDistributionDomain', {
+        value: distribution.distributionDomainName,
+        description: 'Point www CNAME and apex ALIAS here',
     });
 
     new CfnOutput(scope, 'WebsiteDistributionId', {
         value: distribution.distributionId,
-        description: 'CloudFront distribution ID — used by deploy.sh for cache invalidation',
-    });
-
-    new CfnOutput(scope, 'WebsiteURL', {
-        value: `https://${distribution.distributionDomainName}`,
-        description: 'CloudFront domain — point DNS CNAME/ALIAS here',
+        description: 'Use for cache invalidation',
     });
 
     return { bucket, distribution };
 };
+
+module.exports = { createWebsite };
