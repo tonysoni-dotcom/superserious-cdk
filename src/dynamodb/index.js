@@ -28,6 +28,7 @@ import { Blocks } from './Tables/Blocks.js';
 import { SavedItems } from './Tables/SavedItems.js';
 import { EmailInbox } from './Tables/EmailInbox.js';
 import { EmailSenders } from './Tables/EmailSenders.js';
+import { InviteRequests } from './Tables/InviteRequests.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -59,6 +60,7 @@ export const createScopedTables = (scope) => {
         SavedItems: createTable(scope, SavedItems),
         EmailInbox: createTable(scope, EmailInbox),
         EmailSenders: createTable(scope, EmailSenders),
+        InviteRequests: createTable(scope, InviteRequests),
     }
     return tables;
 }
