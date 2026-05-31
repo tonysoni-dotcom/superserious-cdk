@@ -3,6 +3,8 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ses from 'aws-cdk-lib/aws-ses';
 import * as sesActions from 'aws-cdk-lib/aws-ses-actions';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 
 const policies = {
@@ -46,6 +48,7 @@ const permissions = [
     { actions: [...policies.s3], resources: ['*'] },
     { actions: [...policies.bedrock], resources: ['*'] },
     { actions: [...policies.secret], resources: ['*'] },
+    { actions: ['textract:StartDocumentTextDetection', 'textract:DetectDocumentText', 'textract:GetDocumentTextDetection'], resources: ['*'] },
 ];
 
 export const createBackendLambda = (scope) => {
@@ -106,7 +109,7 @@ export const createSocketLambda = (scope) => {
 // NOTE: SES receipt rule sets are not auto-activated by CloudFormation — after deploy,
 // set "v1x-inbound-rules" active once (SES console → Email receiving), and the
 // save.superserious.com MX + DKIM DNS must be in place for mail to arrive.
-export const createInboundEmail = (scope) => {
+export const createInboundEmail = (scope, textract) => {
     const bucket = new s3.Bucket(scope, 'cdk-email-inbound-bucket', {
         removalPolicy: RemovalPolicy.DESTROY,
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -127,6 +130,14 @@ export const createInboundEmail = (scope) => {
         }));
     });
 
+    // Allow the handler to hand the Textract service role to Textract when starting a job.
+    if (textract?.roleArn) {
+        role.addToPolicy(new iam.PolicyStatement({
+            actions: ['iam:PassRole'],
+            resources: [textract.roleArn],
+        }));
+    }
+
     const fn = new lambda.Function(scope, 'cdk-inbound-email-lambda', {
         functionName: 'v1xInboundEmail',
         runtime: lambda.Runtime.NODEJS_20_X,
@@ -137,6 +148,7 @@ export const createInboundEmail = (scope) => {
         environment: {
             INBOUND_EMAIL_BUCKET: bucket.bucketName,
             INBOUND_EMAIL_PREFIX: 'inbound/',
+            ...(textract ? { TEXTRACT_SNS_TOPIC_ARN: textract.topicArn, TEXTRACT_ROLE_ARN: textract.roleArn } : {}),
         },
     });
     bucket.grantRead(fn);
@@ -157,4 +169,38 @@ export const createInboundEmail = (scope) => {
     });
 
     return { bucket, fn, ruleSet };
+}
+
+// Textract OCR for scanned PDFs: an SNS topic Textract notifies on completion, a service role
+// Textract assumes to publish, and a callback Lambda that writes the OCR'd text back onto the
+// saved item. The inbound handler starts jobs with NotificationChannel → this topic/role.
+export const createTextractOcr = (scope) => {
+    const topic = new sns.Topic(scope, 'cdk-textract-topic');
+
+    // Role Textract assumes to publish completion notifications to the topic.
+    const serviceRole = new iam.Role(scope, 'TextractServiceRole', {
+        assumedBy: new iam.ServicePrincipal('textract.amazonaws.com'),
+    });
+    topic.grantPublish(serviceRole);
+
+    // Callback Lambda: fetches results + updates the item. Same backend asset + permission set.
+    const role = new iam.Role(scope, 'TextractCallbackRole', {
+        assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+        managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')],
+    });
+    permissions.forEach((perm) => {
+        role.addToPolicy(new iam.PolicyStatement({ actions: perm.actions, resources: perm.resources }));
+    });
+
+    const fn = new lambda.Function(scope, 'cdk-textract-callback-lambda', {
+        functionName: 'v1xTextractCallback',
+        runtime: lambda.Runtime.NODEJS_20_X,
+        handler: 'textract-callback-handler.handler',
+        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
+        role: role,
+        timeout: Duration.seconds(120),
+    });
+    topic.addSubscription(new snsSubscriptions.LambdaSubscription(fn));
+
+    return { topic, topicArn: topic.topicArn, serviceRole, roleArn: serviceRole.roleArn, fn };
 }
