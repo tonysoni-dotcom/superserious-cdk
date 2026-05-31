@@ -1,6 +1,9 @@
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
-import { Duration } from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as ses from 'aws-cdk-lib/aws-ses';
+import * as sesActions from 'aws-cdk-lib/aws-ses-actions';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 
 const policies = {
     cognito : [
@@ -64,7 +67,7 @@ export const createBackendLambda = (scope) => {
         functionName: 'v1xBackend',
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'handler.handler',
-        code: lambda.Code.fromAsset("../backend"),
+        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
         role: role,
         timeout: Duration.seconds(300),
         environment: {
@@ -93,8 +96,65 @@ export const createSocketLambda = (scope) => {
         functionName: 'v1xSocket',
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'socket-handler.handler',
-        code: lambda.Code.fromAsset("../backend"),
+        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
         role: role,
         timeout: Duration.seconds(300),
     });
+}
+
+// Inbound email pipeline: S3 bucket (raw messages) + processing Lambda + SES receipt rule.
+// NOTE: SES receipt rule sets are not auto-activated by CloudFormation — after deploy,
+// set "v1x-inbound-rules" active once (SES console → Email receiving), and the
+// save.superserious.com MX + DKIM DNS must be in place for mail to arrive.
+export const createInboundEmail = (scope) => {
+    const bucket = new s3.Bucket(scope, 'cdk-email-inbound-bucket', {
+        removalPolicy: RemovalPolicy.DESTROY,
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        lifecycleRules: [{ expiration: Duration.days(30) }],
+    });
+
+    const role = new iam.Role(scope, 'InboundEmailLambdaRole', {
+        assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+        managedPolicies: [
+            iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')
+        ]
+    });
+
+    permissions.forEach((perm) => {
+        role.addToPolicy(new iam.PolicyStatement({
+            actions: perm.actions,
+            resources: perm.resources,
+        }));
+    });
+
+    const fn = new lambda.Function(scope, 'cdk-inbound-email-lambda', {
+        functionName: 'v1xInboundEmail',
+        runtime: lambda.Runtime.NODEJS_20_X,
+        handler: 'inbound-email-handler.handler',
+        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
+        role: role,
+        timeout: Duration.seconds(120),
+        environment: {
+            INBOUND_EMAIL_BUCKET: bucket.bucketName,
+            INBOUND_EMAIL_PREFIX: 'inbound/',
+        },
+    });
+    bucket.grantRead(fn);
+
+    // SES executes actions in order: store the raw message to S3, then invoke the Lambda.
+    const ruleSet = new ses.ReceiptRuleSet(scope, 'cdk-email-receipt-ruleset', {
+        receiptRuleSetName: 'v1x-inbound-rules',
+        rules: [
+            {
+                recipients: ['save.superserious.com'],
+                scanEnabled: true,
+                actions: [
+                    new sesActions.S3({ bucket, objectKeyPrefix: 'inbound/' }),
+                    new sesActions.Lambda({ function: fn, invocationType: sesActions.LambdaInvocationType.EVENT }),
+                ],
+            },
+        ],
+    });
+
+    return { bucket, fn, ruleSet };
 }
