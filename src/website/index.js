@@ -5,7 +5,6 @@ const acm = require('aws-cdk-lib/aws-certificatemanager');
 const { CfnOutput, Stack } = require('aws-cdk-lib');
 
 const API_GATEWAY_DOMAIN = '71lvzho52a.execute-api.us-east-1.amazonaws.com';
-
 const CERT_ARN = 'arn:aws:acm:us-east-1:260319374997:certificate/081272d9-7bd7-4362-8e6b-cab37654ace6';
 const DOMAIN_NAMES = ['superserious.com', 'www.superserious.com'];
 
@@ -28,9 +27,8 @@ const createWebsite = (scope) => {
         runtime: cloudfront.FunctionRuntime.JS_2_0,
     });
 
-    // Strip the leading /api before forwarding to the API Gateway origin
-    // (which has originPath /dev). Without this, the origin receives
-    // /dev/api/<route> and 404s; with it, /dev/<route> hits the real route.
+    // Strips /api prefix before forwarding to API Gateway (/dev).
+    // Without this, /api/X hits /dev/api/X → 404; with it, /api/X → /dev/X.
     const stripApiPrefixFn = new cloudfront.Function(scope, 'SuperseriousStripApi', {
         functionName: 'superserious-strip-api',
         code: cloudfront.FunctionCode.fromInline(
