@@ -145,6 +145,7 @@ export const createInboundEmail = (scope, textract) => {
         code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
         role: role,
         timeout: Duration.seconds(120),
+        memorySize: 1024, // headroom for the mupdf (WASM) PDF render used for cover thumbnails
         environment: {
             INBOUND_EMAIL_BUCKET: bucket.bucketName,
             INBOUND_EMAIL_PREFIX: 'inbound/',
