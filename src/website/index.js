@@ -28,6 +28,23 @@ const createWebsite = (scope) => {
         runtime: cloudfront.FunctionRuntime.JS_2_0,
     });
 
+    // Strip the leading /api before forwarding to the API Gateway origin
+    // (which has originPath /dev). Without this, the origin receives
+    // /dev/api/<route> and 404s; with it, /dev/<route> hits the real route.
+    const stripApiPrefixFn = new cloudfront.Function(scope, 'SuperseriousStripApi', {
+        functionName: 'superserious-strip-api',
+        code: cloudfront.FunctionCode.fromInline(
+            `function handler(event) {
+    var req = event.request;
+    var uri = req.uri;
+    if (uri.indexOf('/api/') === 0) req.uri = uri.substring(4);
+    else if (uri === '/api') req.uri = '/';
+    return req;
+}`
+        ),
+        runtime: cloudfront.FunctionRuntime.JS_2_0,
+    });
+
     const oac = new cloudfront.S3OriginAccessControl(scope, 'SuperseriousOAC', {
         originAccessControlName: 'superserious-oac',
     });
@@ -58,6 +75,10 @@ const createWebsite = (scope) => {
                 cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
                 originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
                 allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+                functionAssociations: [{
+                    function: stripApiPrefixFn,
+                    eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+                }],
             },
         },
     });
