@@ -34,7 +34,7 @@ import { SiteComments } from './Tables/SiteComments.js';
 import { SiteCommentMods } from './Tables/SiteCommentMods.js';
 import { SiteCardLikes } from './Tables/SiteCardLikes.js';
 import { SiteReferrals } from './Tables/SiteReferrals.js';
-// import { PulseEvents } from './Tables/PulseEvents.js'; // temporarily removed — key schema fix in progress
+import { PulseEvents } from './Tables/PulseEvents.js';
 import { PulseSessions } from './Tables/PulseSessions.js';
 import { TenantStats } from './Tables/TenantStats.js';
 import { AppEvents } from './Tables/AppEvents.js';
@@ -75,7 +75,7 @@ export const createScopedTables = (scope) => {
         SiteCommentMods: createTable(scope, SiteCommentMods),
         SiteCardLikes: createTable(scope, SiteCardLikes),
         SiteReferrals: createTable(scope, SiteReferrals),
-        // PulseEvents: createTable(scope, PulseEvents), // temporarily removed — key schema fix in progress
+        PulseEvents: createTable(scope, PulseEvents),
         PulseSessions: createTable(scope, PulseSessions),
         TenantStats: createTable(scope, TenantStats),
         AppEvents: createTable(scope, AppEvents),
