@@ -38,6 +38,18 @@ import { PulseEvents } from './Tables/PulseEvents.js';
 import { PulseSessions } from './Tables/PulseSessions.js';
 import { TenantStats } from './Tables/TenantStats.js';
 import { AppEvents } from './Tables/AppEvents.js';
+import { TacoNudges } from './Tables/TacoNudges.js';
+import { ProSocialScores } from './Tables/ProSocialScores.js';
+import { ScheduledLikes } from './Tables/ScheduledLikes.js';
+import { EvaluatedContent } from './Tables/EvaluatedContent.js';
+import { OwnerChatAssist } from './Tables/OwnerChatAssist.js';
+import { ScreenedContent } from './Tables/ScreenedContent.js';
+import { MentorAssignments } from './Tables/MentorAssignments.js';
+import { MatchHistory } from './Tables/MatchHistory.js';
+import { JourneySummaries } from './Tables/JourneySummaries.js';
+import { MentorWisdom } from './Tables/MentorWisdom.js';
+import { MentorMemoryState } from './Tables/MentorMemoryState.js';
+import { ElephantAssistState } from './Tables/ElephantAssistState.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -79,6 +91,19 @@ export const createScopedTables = (scope) => {
         PulseSessions: createTable(scope, PulseSessions),
         TenantStats: createTable(scope, TenantStats),
         AppEvents: createTable(scope, AppEvents),
+        // ── In-app agent tables ──
+        TacoNudges: createTable(scope, TacoNudges),
+        ProSocialScores: createTable(scope, ProSocialScores),
+        ScheduledLikes: createTable(scope, ScheduledLikes),
+        EvaluatedContent: createTable(scope, EvaluatedContent),
+        OwnerChatAssist: createTable(scope, OwnerChatAssist),
+        ScreenedContent: createTable(scope, ScreenedContent),
+        MentorAssignments: createTable(scope, MentorAssignments),
+        MatchHistory: createTable(scope, MatchHistory),
+        JourneySummaries: createTable(scope, JourneySummaries),
+        MentorWisdom: createTable(scope, MentorWisdom),
+        MentorMemoryState: createTable(scope, MentorMemoryState),
+        ElephantAssistState: createTable(scope, ElephantAssistState),
     }
     return tables;
 }

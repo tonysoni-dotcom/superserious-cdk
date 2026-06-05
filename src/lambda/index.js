@@ -1,5 +1,6 @@
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ses from 'aws-cdk-lib/aws-ses';
 import * as sesActions from 'aws-cdk-lib/aws-ses-actions';
@@ -77,6 +78,48 @@ export const createBackendLambda = (scope) => {
             TOOLS_API_KEY: process.env.TOOLS_API_KEY || '',
             PULSE_ADMIN_TOKEN: process.env.PULSE_ADMIN_TOKEN || '',
         },
+    });
+}
+
+// Single Lambda hosting the 7 in-app agents (taco-nudge, good-vibes, mini-me,
+// church-lady, welcome-wagon, matchmaker, elephant). Invoked by EventBridge
+// schedules (see src/schedules) and on-demand. Same broad data-plane permissions
+// as the backend, plus sns:Publish for SMS escalation (mini-me / church-lady).
+export const createAgentsLambda = (scope) => {
+    const role = new iam.Role(scope, `AgentsLambdaRole`, {
+        assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+        managedPolicies: [
+            iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')
+        ]
+    });
+
+    permissions.forEach((perm) => {
+        role.addToPolicy(new iam.PolicyStatement({
+            actions: perm.actions,
+            resources: perm.resources,
+        }));
+    });
+
+    // SNS publish for SMS escalation — scoped to this role only so the other
+    // Lambdas' IAM is unchanged.
+    role.addToPolicy(new iam.PolicyStatement({
+        actions: ['sns:Publish'],
+        resources: ['*'],
+    }));
+
+    return new lambda.Function(scope, 'cdk-agents-lambda', {
+        functionName: 'v1xAgents',
+        runtime: lambda.Runtime.NODEJS_20_X,
+        handler: 'handler.handler',
+        code: lambda.Code.fromAsset("../superserious-agents", { exclude: [".git", "node_modules/.cache"] }),
+        role: role,
+        timeout: Duration.seconds(300),
+        // Import the conventional log group instead of letting the
+        // useCdkManagedLogGroup feature flag create one — that flag's managed
+        // LogGroup collides (AlreadyExists) with the group Lambda provisions for
+        // the function. Passing an explicit logGroup skips the create entirely
+        // and leaves logging unmanaged, matching the other Lambdas in this stack.
+        logGroup: logs.LogGroup.fromLogGroupName(scope, 'AgentsLambdaLogGroup', '/aws/lambda/v1xAgents'),
     });
 }
 

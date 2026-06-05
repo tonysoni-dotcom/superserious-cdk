@@ -11,11 +11,16 @@ const agentSchedules = [
     { name: 'elephant',       schedule: 'cron(0 2 * * ? *)' },
 ];
 
-export const createAgentSchedules = (scope, agentsLambda) => {
+// `enabled` defaults to false: the rules are created in a DISABLED state so the
+// agents never fire automatically on deploy. Validate each agent by invoking the
+// Lambda manually first, then flip to enabled (pass { enabled: true } or toggle
+// the rules in the EventBridge console) as a deliberate go-live step.
+export const createAgentSchedules = (scope, agentsLambda, { enabled = false } = {}) => {
     agentSchedules.forEach(({ name, schedule }) => {
         const rule = new events.Rule(scope, `agent-schedule-${name}`, {
             ruleName: `v1x-agent-${name}`,
             schedule: events.Schedule.expression(schedule),
+            enabled,
         });
 
         rule.addTarget(new targets.LambdaFunction(agentsLambda, {
