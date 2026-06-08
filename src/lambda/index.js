@@ -71,7 +71,7 @@ export const createBackendLambda = (scope) => {
         functionName: 'v1xBackend',
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'handler.handler',
-        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
+        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache", "node_modules/.bin", "**/node_modules/.bin"] }),
         role: role,
         timeout: Duration.seconds(300),
         environment: {
@@ -142,7 +142,7 @@ export const createSocketLambda = (scope) => {
         functionName: 'v1xSocket',
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'socket-handler.handler',
-        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
+        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache", "node_modules/.bin", "**/node_modules/.bin"] }),
         role: role,
         timeout: Duration.seconds(300),
     });
@@ -185,7 +185,7 @@ export const createInboundEmail = (scope, textract) => {
         functionName: 'v1xInboundEmail',
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'inbound-email-handler.handler',
-        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
+        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache", "node_modules/.bin", "**/node_modules/.bin"] }),
         role: role,
         timeout: Duration.seconds(120),
         memorySize: 1024, // headroom for the mupdf (WASM) PDF render used for cover thumbnails
@@ -240,7 +240,7 @@ export const createTextractOcr = (scope) => {
         functionName: 'v1xTextractCallback',
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'textract-callback-handler.handler',
-        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache"] }),
+        code: lambda.Code.fromAsset("../backend", { exclude: ["node_modules/geoip-lite/data", ".git", "node_modules/.cache", "node_modules/.bin", "**/node_modules/.bin"] }),
         role: role,
         timeout: Duration.seconds(120),
     });
