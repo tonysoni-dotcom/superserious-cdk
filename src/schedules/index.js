@@ -9,6 +9,7 @@ const agentSchedules = [
     { name: 'welcome-wagon',  schedule: 'rate(15 minutes)' },
     { name: 'matchmaker',     schedule: 'cron(0 8 * * ? *)' },
     { name: 'elephant',       schedule: 'cron(0 2 * * ? *)' },
+    { name: 'muse-daily',     schedule: 'cron(0 13 * * ? *)' }, // ~9am ET — deck-ready push
 ];
 
 // `enabled` defaults to false: the rules are created in a DISABLED state so the

@@ -50,6 +50,9 @@ import { JourneySummaries } from './Tables/JourneySummaries.js';
 import { MentorWisdom } from './Tables/MentorWisdom.js';
 import { MentorMemoryState } from './Tables/MentorMemoryState.js';
 import { ElephantAssistState } from './Tables/ElephantAssistState.js';
+import { MuseDecks } from './Tables/MuseDecks.js';
+import { MuseDrafts } from './Tables/MuseDrafts.js';
+import { CuratorSettings } from './Tables/CuratorSettings.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -104,6 +107,10 @@ export const createScopedTables = (scope) => {
         MentorWisdom: createTable(scope, MentorWisdom),
         MentorMemoryState: createTable(scope, MentorMemoryState),
         ElephantAssistState: createTable(scope, ElephantAssistState),
+        // ── Daily Muse (Phase 3) ──
+        MuseDecks: createTable(scope, MuseDecks),
+        MuseDrafts: createTable(scope, MuseDrafts),
+        CuratorSettings: createTable(scope, CuratorSettings),
     }
     return tables;
 }
