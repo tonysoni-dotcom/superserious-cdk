@@ -6,6 +6,7 @@ import { Otps } from './Tables/Otps.js';
 import { Connections } from './Tables/Connections.js';
 import { ChatPreview } from './Tables/ChatPreview.js';
 import { ChatMessages } from './Tables/ChatMessages.js';
+import { ChatRooms } from './Tables/ChatRooms.js';
 import { ChatBots } from './Tables/ChatBots.js';
 import { UserCourseProgress } from './Tables/UserCourseProgress.js';
 import { CourseUserResponses } from './Tables/CourseUserResponses.js';
@@ -59,6 +60,7 @@ export const createScopedTables = (scope) => {
         Connections: createTable(scope, Connections),
         ChatPreview: createTable(scope, ChatPreview),
         ChatMessages: createTable(scope, ChatMessages),
+        ChatRooms: createTable(scope, ChatRooms),
         ChatBots: createTable(scope, ChatBots),
         UserCourseProgress: createTable(scope, UserCourseProgress),
         CourseUserResponses: createTable(scope, CourseUserResponses),
