@@ -11,6 +11,7 @@ const agentSchedules = [
     { name: 'elephant',       schedule: 'cron(0 2 * * ? *)' },
     { name: 'planning',       schedule: 'rate(1 hour)'      }, // Gatherings: reminders, standing-cycle generation, self-propose nudges
     { name: 'journey',        schedule: 'rate(7 days)'      }, // Member journey: LinkedIn refresh + role-evolution nudges
+    { name: 'muse-daily',     schedule: 'cron(0 13 * * ? *)' }, // ~9am ET — deck-ready push
 ];
 
 // `enabled` defaults to false: the rules are created in a DISABLED state so the

@@ -60,6 +60,9 @@ import { PlanMessages } from './Tables/PlanMessages.js';
 import { RoleSlots } from './Tables/RoleSlots.js';
 import { MemberOffers } from './Tables/MemberOffers.js';
 import { JourneyEvents } from './Tables/JourneyEvents.js';
+import { MuseDecks } from './Tables/MuseDecks.js';
+import { MuseDrafts } from './Tables/MuseDrafts.js';
+import { CuratorSettings } from './Tables/CuratorSettings.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -124,6 +127,10 @@ export const createScopedTables = (scope) => {
         RoleSlots: createTable(scope, RoleSlots),
         MemberOffers: createTable(scope, MemberOffers),
         JourneyEvents: createTable(scope, JourneyEvents),
+        // ── Daily Muse (Phase 3) ──
+        MuseDecks: createTable(scope, MuseDecks),
+        MuseDrafts: createTable(scope, MuseDrafts),
+        CuratorSettings: createTable(scope, CuratorSettings),
     }
     return tables;
 }
