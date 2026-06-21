@@ -51,6 +51,15 @@ import { JourneySummaries } from './Tables/JourneySummaries.js';
 import { MentorWisdom } from './Tables/MentorWisdom.js';
 import { MentorMemoryState } from './Tables/MentorMemoryState.js';
 import { ElephantAssistState } from './Tables/ElephantAssistState.js';
+// ── Gatherings (planning surface) tables ──
+import { Plans } from './Tables/Plans.js';
+import { Occurrences } from './Tables/Occurrences.js';
+import { Commitments } from './Tables/Commitments.js';
+import { HistoryEntries } from './Tables/HistoryEntries.js';
+import { PlanMessages } from './Tables/PlanMessages.js';
+import { RoleSlots } from './Tables/RoleSlots.js';
+import { MemberOffers } from './Tables/MemberOffers.js';
+import { JourneyEvents } from './Tables/JourneyEvents.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -106,6 +115,15 @@ export const createScopedTables = (scope) => {
         MentorWisdom: createTable(scope, MentorWisdom),
         MentorMemoryState: createTable(scope, MentorMemoryState),
         ElephantAssistState: createTable(scope, ElephantAssistState),
+        // ── Gatherings (planning surface) tables ──
+        Plans: createTable(scope, Plans),
+        Occurrences: createTable(scope, Occurrences),
+        Commitments: createTable(scope, Commitments),
+        HistoryEntries: createTable(scope, HistoryEntries),
+        PlanMessages: createTable(scope, PlanMessages),
+        RoleSlots: createTable(scope, RoleSlots),
+        MemberOffers: createTable(scope, MemberOffers),
+        JourneyEvents: createTable(scope, JourneyEvents),
     }
     return tables;
 }

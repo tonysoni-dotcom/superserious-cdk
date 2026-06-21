@@ -9,6 +9,8 @@ const agentSchedules = [
     { name: 'welcome-wagon',  schedule: 'rate(15 minutes)' },
     { name: 'matchmaker',     schedule: 'cron(0 8 * * ? *)' },
     { name: 'elephant',       schedule: 'cron(0 2 * * ? *)' },
+    { name: 'planning',       schedule: 'rate(1 hour)'      }, // Gatherings: reminders, standing-cycle generation, self-propose nudges
+    { name: 'journey',        schedule: 'rate(7 days)'      }, // Member journey: LinkedIn refresh + role-evolution nudges
 ];
 
 // `enabled` defaults to false: the rules are created in a DISABLED state so the
