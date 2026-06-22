@@ -50,6 +50,7 @@ import { JourneySummaries } from './Tables/JourneySummaries.js';
 import { MentorWisdom } from './Tables/MentorWisdom.js';
 import { MentorMemoryState } from './Tables/MentorMemoryState.js';
 import { ElephantAssistState } from './Tables/ElephantAssistState.js';
+import { SocialTokens } from './Tables/SocialTokens.js';
 
 export const createScopedTables = (scope) => {
     const tables = {
@@ -104,6 +105,7 @@ export const createScopedTables = (scope) => {
         MentorWisdom: createTable(scope, MentorWisdom),
         MentorMemoryState: createTable(scope, MentorMemoryState),
         ElephantAssistState: createTable(scope, ElephantAssistState),
+        SocialTokens: createTable(scope, SocialTokens),
     }
     return tables;
 }
