@@ -41,6 +41,7 @@ import { TenantStats } from './Tables/TenantStats.js';
 import { AppEvents } from './Tables/AppEvents.js';
 import { UserLocations } from './Tables/UserLocations.js';
 import { TenantConfigs } from './Tables/TenantConfigs.js';
+import { Products } from './Tables/Products.js';
 import { TacoNudges } from './Tables/TacoNudges.js';
 import { ProSocialScores } from './Tables/ProSocialScores.js';
 import { ScheduledLikes } from './Tables/ScheduledLikes.js';
@@ -109,6 +110,7 @@ export const createScopedTables = (scope) => {
         AppEvents: createTable(scope, AppEvents),
         UserLocations: createTable(scope, UserLocations),
         TenantConfigs: createTable(scope, TenantConfigs),
+        Products: createTable(scope, Products),
         // ── In-app agent tables ──
         TacoNudges: createTable(scope, TacoNudges),
         ProSocialScores: createTable(scope, ProSocialScores),
