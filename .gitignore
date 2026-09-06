@@ -3,3 +3,7 @@ node_modules
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# Local deploy secrets (never commit)
+.env.deploy
+.env*.local

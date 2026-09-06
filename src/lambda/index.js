@@ -1,5 +1,6 @@
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as kms from 'aws-cdk-lib/aws-kms';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ses from 'aws-cdk-lib/aws-ses';
@@ -67,6 +68,15 @@ export const createBackendLambda = (scope) => {
         }));
     });
 
+    // KMS key for encrypting per-tenant store credentials (App Store Connect .p8 /
+    // Google Play service-account JSON) at rest in v1xTenantConfigs. Only the backend
+    // role can Encrypt/Decrypt — the ciphertext in DynamoDB is useless without this key.
+    const credentialsKey = new kms.Key(scope, 'TenantCredentialsKey', {
+        enableKeyRotation: true,
+        description: 'Encrypts per-tenant App Store Connect & Google Play credentials',
+    });
+    credentialsKey.grantEncryptDecrypt(role);
+
     return new lambda.Function(scope, 'cdk-backend-lambda', {
         functionName: 'v1xBackend',
         runtime: lambda.Runtime.NODEJS_20_X,
@@ -77,6 +87,11 @@ export const createBackendLambda = (scope) => {
         environment: {
             TOOLS_API_KEY: process.env.TOOLS_API_KEY || '',
             PULSE_ADMIN_TOKEN: process.env.PULSE_ADMIN_TOKEN || '',
+            TENANT_CREDENTIALS_KEY_ID: credentialsKey.keyId,
+            // Build-button dispatch → release-tenant GitHub Actions workflow.
+            GITHUB_REPO: process.env.GITHUB_REPO || '',
+            GITHUB_DISPATCH_TOKEN: process.env.GITHUB_DISPATCH_TOKEN || '',
+            GITHUB_BUILD_REF: process.env.GITHUB_BUILD_REF || 'main',
         },
     });
 }
